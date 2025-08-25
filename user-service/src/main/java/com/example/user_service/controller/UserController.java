@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.ObjLongConsumer;
 
 @RestController
 @RequestMapping("/api/users")
@@ -30,5 +32,13 @@ public class UserController {
         Optional<User> userOpt = userService.getUserByUsername(username);
         return userOpt.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public ResponseEntity<User> getUserById(@RequestParam Long id)
+    {
+        Optional<User> user=userService.getUserById(id);
+        return user.map(ResponseEntity::ok).orElseGet(
+                ()-> ResponseEntity.notFound().build());
     }
 }
