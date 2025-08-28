@@ -34,11 +34,12 @@ public class UserController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping
+    @GetMapping()
     public ResponseEntity<User> getUserById(@RequestParam Long id)
     {
         Optional<User> user=userService.getUserById(id);
         return user.map(ResponseEntity::ok).orElseGet(
                 ()-> ResponseEntity.notFound().build());
     }
+
 }

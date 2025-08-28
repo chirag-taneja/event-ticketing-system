@@ -1,8 +1,14 @@
 package com.example.ticket_service.service;
 
+import com.example.ticket_service.external_class.Event;
+import com.example.ticket_service.external_class.User;
+import com.example.ticket_service.external_service.EventService;
+import com.example.ticket_service.external_service.UserService;
 import com.example.ticket_service.model.Ticket;
 import com.example.ticket_service.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,6 +18,19 @@ import java.util.Optional;
 
 @Service
 public class TicketService {
+
+    UserService userService;
+    EventService eventService;
+
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Autowired
+    public void setEventService(EventService eventService) {
+        this.eventService = eventService;
+    }
 
     TicketRepository ticketRepository;
 
@@ -74,23 +93,35 @@ public class TicketService {
     }
 
     private boolean userExists(Long userId) {
-        String userServiceUrl = "http://localhost:8081/api/users?id=" + userId;
-        try {
-            restTemplate.getForObject(userServiceUrl, Object.class);
+//        String userServiceUrl = "http://USER-SERVICE/api/users?id=" + userId;
+//        try {
+//            restTemplate.getForObject(userServiceUrl, Object.class);
+//            return true;
+//        } catch (Exception ex) {
+//            return false;
+//        }
+        ResponseEntity<User> user = userService.getUserById(userId);
+        if (user.getStatusCode()== HttpStatus.OK)
+        {
             return true;
-        } catch (Exception ex) {
-            return false;
         }
+        return false;
     }
 
     private boolean eventExists(Long eventId) {
-        String eventServiceUrl = "http://localhost:8082/api/events/" + eventId;
-        try {
-            restTemplate.getForObject(eventServiceUrl, Object.class);
+//        String eventServiceUrl = "http://EVENT-SERVICE/api/events/" + eventId;
+//        try {
+//            restTemplate.getForObject(eventServiceUrl, Object.class);
+//            return true;
+//        } catch (Exception ex) {
+//            return false;
+//        }
+        ResponseEntity<Event> event = eventService.getEvent(eventId);
+        if (event.getStatusCode()== HttpStatus.OK)
+        {
             return true;
-        } catch (Exception ex) {
-            return false;
         }
+        return false;
     }
 
 }
