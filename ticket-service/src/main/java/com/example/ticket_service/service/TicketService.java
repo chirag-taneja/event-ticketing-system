@@ -6,6 +6,7 @@ import com.example.ticket_service.external_service.EventService;
 import com.example.ticket_service.external_service.UserService;
 import com.example.ticket_service.model.Ticket;
 import com.example.ticket_service.repository.TicketRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class TicketService {
 
@@ -60,7 +62,10 @@ public class TicketService {
     }
 
     public Optional<Ticket> getTicketById(Long id) {
-        return ticketRepository.findById(id);
+        Optional<Ticket> byId = ticketRepository.findById(id);
+        if (byId.isPresent())return byId;
+        log.error("ticket not present with this id ",id);
+        throw new RuntimeException("Ticket Not Present with this id:"+id);
     }
 
     public List<Ticket> getAllTickets() {

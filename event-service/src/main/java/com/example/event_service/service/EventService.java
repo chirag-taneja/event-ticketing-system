@@ -2,12 +2,14 @@ package com.example.event_service.service;
 
 import com.example.event_service.model.Event;
 import com.example.event_service.repository.EventRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class EventService {
     EventRepository eventRepository;
@@ -22,7 +24,10 @@ public class EventService {
     }
 
     public Optional<Event> getEventById(Long id) {
-        return eventRepository.findById(id);
+        Optional<Event> event = eventRepository.findById(id);
+        if (event.isPresent())return event;
+        log.error("Event Not Found with this id::",id);
+        throw new RuntimeException("Event Not Found with this id: "+id);
     }
 
     public List<Event> getAllEvents() {
@@ -35,7 +40,8 @@ public class EventService {
 
     // Case-insensitive search by title
     public List<Event> findEventsByTitle(String title) {
-        return eventRepository.findByTitleContainingIgnoreCase(title);
+        List<Event> event = eventRepository.findByTitleContainingIgnoreCase(title);
+        return event;
     }
 
     public Event updateEvent(Long id, Event updatedEvent) {

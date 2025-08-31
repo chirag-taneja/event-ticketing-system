@@ -1,0 +1,185 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-db
+  template:
+    metadata:
+      labels:
+        app: user-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: common-secrets
+                  key: USER_DB_PASSWORD
+            - name: POSTGRES_DB
+              value: user_db
+          volumeMounts:
+            - name: user-db-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: user-db-storage
+          persistentVolumeClaim:
+            claimName: user-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+spec:
+  selector:
+    app: user-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  clusterIP: None
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-db
+  template:
+    metadata:
+      labels:
+        app: event-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: event
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: common-secrets
+                  key: EVENT_DB_PASSWORD
+            - name: POSTGRES_DB
+              value: event_db
+          volumeMounts:
+            - name: event-db-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: event-db-storage
+          persistentVolumeClaim:
+            claimName: event-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-db
+spec:
+  selector:
+    app: event-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  clusterIP: None
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ticket-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ticket-db
+  template:
+    metadata:
+      labels:
+        app: ticket-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: ticket
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: common-secrets
+                  key: TICKET_DB_PASSWORD
+            - name: POSTGRES_DB
+              value: ticket_db
+          volumeMounts:
+            - name: ticket-db-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: ticket-db-storage
+          persistentVolumeClaim:
+            claimName: ticket-db-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ticket-db
+spec:
+  selector:
+    app: ticket-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  clusterIP: None
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zipkin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin
+  template:
+    metadata:
+      labels:
+        app: zipkin
+    spec:
+      containers:
+        - name: zipkin
+          image: openzipkin/zipkin
+          ports:
+            - containerPort: 9411
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zipkin
+spec:
+  selector:
+    app: zipkin
+  ports:
+    - protocol: TCP
+      port: 9411
+      targetPort: 9411
+  type: ClusterIP

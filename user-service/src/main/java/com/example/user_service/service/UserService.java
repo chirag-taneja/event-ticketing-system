@@ -3,6 +3,7 @@ package com.example.user_service.service;
 import com.example.user_service.model.Role;
 import com.example.user_service.model.User;
 import com.example.user_service.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserService {
     PasswordEncoder passwordEncoder;
 
@@ -32,10 +34,26 @@ public class UserService {
     }
 
     public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+        Optional<User> byUsername = userRepository.findByUsername(username);
+        if (byUsername.isPresent())
+        {
+            return byUsername;
+        }
+        else {
+            log.error("User Not Found with this user name :: ",username);
+            throw new RuntimeException("User Not Found with this user name");
+        }
     }
 
     public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+        Optional<User> byId = userRepository.findById(id);
+        if (byId.isPresent())
+        {
+            return byId;
+        }
+        else {
+            log.error("User Not Found with this user name :: ",id);
+            throw new RuntimeException("User Not Found with this user id "+id);
+        }
     }
 }

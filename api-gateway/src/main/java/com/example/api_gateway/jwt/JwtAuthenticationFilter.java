@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
                 validateToken(authHeaders.substring(7));
             }
             else {
-                throw new RuntimeException("Token Not Valid");
+                return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token Not Valid"));
             }
 
             return chain.filter(exchange);

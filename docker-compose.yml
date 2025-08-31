@@ -43,6 +43,115 @@ services:
     networks:
       - backend-network
 
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - 9411:9411
+
+  eureka-server:
+    image: discovery-service:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_APPLICATION_NAME=discovery-service
+      - SERVER_PORT=8761
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_INSTANCE_HOSTNAME=eureka-server
+      - EUREKA_DASHBOARD_ENABLED=true
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411/
+      - SPRING_SLEUTH_SAMPLER_PROBABILITY=1.0
+    networks:
+      - backend-network
+
+
+  user-service:
+    image: user-service:latest
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - user-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411/
+
+      - JWT_SECRET=ld;fksayhgtirdoiodsa47908t8908oo340p39w45t4093doskf;asdljkgfdjsld;sljfjdljd;iklsfjasl;kdlf;skl;kdsaghksaofikosfhjdnkl;dfsa;lfdsk;jkfds
+    networks:
+      - backend-network
+
+
+  event-service:
+    image: event-service:latest
+    container_name: event-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      - event-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://event-db:5432/event_db
+      - SPRING_DATASOURCE_USERNAME=event
+      - SPRING_DATASOURCE_PASSWORD=password
+
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411/
+    networks:
+      - backend-network
+
+
+  ticket-service:
+    image: ticket-service:latest
+    container_name: ticket-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-server
+      - ticket-db
+    environment:
+
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ticket-db:5432/ticket_db
+      - SPRING_DATASOURCE_USERNAME=ticket
+      - SPRING_DATASOURCE_PASSWORD=password
+
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411/
+    networks:
+      - backend-network
+
+  api-gateway:
+    image: api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+      - user-service
+      - event-service
+      - ticket-service
+    environment:
+
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+      - JWT_SECRET=ld;fksayhgtirdoiodsa47908t8908oo340p39w45t4093doskf;asdljkgfdjsld;sljfjdljd;iklsfjasl;kdlf;skl;kdsaghksaofikosfhjdnkl;dfsa;lfdsk;jkfds
+
+      - SPRING_ZIPKIN_BASE_URL=http://zipkin:9411/
+    networks:
+      - backend-network
+
+
+
+
 networks:
   backend-network:
     driver: bridge
