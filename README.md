@@ -8,7 +8,7 @@ This project is a microservices-based event scheduling and ticketing platform bu
 - Spring Boot, Spring Cloud  
 - PostgreSQL  
 - Docker and Docker Compose, Kubernetes
-- JWT (planned for authentication)  
+- JWT (authentication)  
 
 ## Microservices in the Project  
 - user-service  
